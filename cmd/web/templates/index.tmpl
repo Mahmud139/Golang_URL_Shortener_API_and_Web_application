@@ -60,6 +60,15 @@
 		background-color: #218838;
     }
 
+	h6{
+		padding-bottom: 0%;
+		margin-bottom: 0%;
+	}
+
+	ul{
+		margin-bottom: 10px;
+	}
+
     .result {
 		margin-top: 20px;
 		padding: 10px;
@@ -89,7 +98,7 @@
     </form>
 
 	<div>
-		<h6>Note:</h6>
+		<h5>Note:</h5>
 		<ul>
 			<li><small>You can create 3 short URL in 1 minute.</small></li>
 			<li><small>You can create 10 short URL in 30 minutes.</small></li>
@@ -144,9 +153,6 @@
 		document.getElementById("result").style.display = "block";
 		document.getElementById("result").innerHTML = `<strong>Error:</strong> Network error occurred.`;
 	  };
-  
-	  console.log(JSON.stringify(data));
-  
 	  // Send the request with the data
 	  xhr.send(JSON.stringify(data));
 	}

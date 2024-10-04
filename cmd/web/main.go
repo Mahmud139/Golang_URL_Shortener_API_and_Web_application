@@ -78,10 +78,8 @@ func main() {
 		rdb:      rdb,
 	}
 
-	// fiberApp := fiber.New()
 	fiberApp := fiber.New(fiber.Config{
 		AppName: "QuickLink!",
-		// DisableStartupMessage: true,
 	})
 
 	app.routes(fiberApp)

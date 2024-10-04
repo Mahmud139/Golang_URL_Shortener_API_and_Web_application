@@ -19,14 +19,6 @@ type input struct {
 	Expiry      time.Duration `json:"expiry"`
 }
 
-// type output struct {
-// 	URL             string        `json:"url"`
-// 	ShortenURL      string        `json:"shorten_url"`
-// 	Expiry          time.Duration `json:"expiry"`
-// 	XRateRemaining  int           `json:"rate_remaining"`
-// 	XRateLimitReset time.Duration `json:"rate_limit_reset"`
-// }
-
 func (app *application) shortenURL(c *fiber.Ctx) error {
 	body := new(input)
 
