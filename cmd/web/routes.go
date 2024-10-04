@@ -20,7 +20,7 @@ func (app *application) routes(r *fiber.App) {
 		Expiration: 1 * time.Minute,
 		SkipFailedRequests: true,
 	}), app.shortenURL)
-	r.Get("/healthcheck", app.healthCheckHandler)
+	r.Get("/app/healthcheck", app.healthCheckHandler)
 	
 
 	r.Use(func(c *fiber.Ctx) error {
