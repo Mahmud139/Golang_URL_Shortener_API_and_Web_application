@@ -1,13 +1,26 @@
 package main
 
 import (
+	"time"
+
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/limiter"
+	"github.com/gofiber/fiber/v2/middleware/recover"
 )
 
 func (app *application) routes(r *fiber.App) {
-	//need to implement rate limiter middleware
-	// need to implement panic recover middleware
-	// need to implement not found(404) middleware
+	r.Use(recover.New(recover.Config{
+		EnableStackTrace: true,
+	}))
+
 	r.Get("/:url", app.resolveURL)
-	r.Post("/v1/url", app.shortenURL)
+	r.Post("/v1/url", limiter.New(limiter.Config{
+		Max: 3,
+		Expiration: 1 * time.Minute,
+		SkipFailedRequests: true,
+	}), app.shortenURL)
+
+	r.Use(func(c *fiber.Ctx) error {
+        return c.SendStatus(404)
+    })
 }
