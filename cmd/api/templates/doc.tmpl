@@ -1,0 +1,233 @@
+{{define "doc"}}
+	<!DOCTYPE html>
+	<html lang="en">
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<meta http-equiv="X-UA-Compatible" content="ie=edge">
+		<title>URL Shorten API Documentation</title>
+		<style>
+			body {
+				font-family: Arial, sans-serif;
+				margin: 0;
+				padding: 0;
+				background-color: #f4f4f9;
+			}
+			header {
+				background-color: #4CAF50;
+				color: white;
+				padding: 15px;
+				text-align: center;
+			}
+			a {
+				text-decoration: none;
+			}
+			.container {
+				margin: 20px auto;
+				width: 80%;
+				background-color: white;
+				padding: 20px;
+				box-shadow: 0px 0px 10px rgba(0,0,0,0.1);
+			}
+			table {
+				width: 100%;
+				border-collapse: collapse;
+				margin-bottom: 20px;
+			}
+			th, td {
+				border: 1px solid #dddddd;
+				text-align: left;
+				padding: 8px;
+			}
+			th {
+				background-color: #79a479;
+				color: white;
+			}
+			td {
+				background-color: #f9f9f9;
+			}
+			.endpoint {
+				font-weight: bold;
+				color: #333;
+			}
+			.description {
+				margin-top: 20px;
+				color: #555;
+			}
+			.code-block {
+				background-color: #f2f2f2;
+				padding: 10px;
+				font-family: monospace;
+				color: #333;
+			}
+			footer {
+				text-align: center;
+				padding: 20px;
+				background-color: #4CAF50;
+				color: white;
+				margin-top: 20px;
+			}
+			@media (max-width: 768px) {
+				.container {
+					width: 85%; 
+					padding: 15px; 
+				}
+
+				header {
+					width: 95%;
+					padding: 10px; 
+				}
+
+				h1 {
+					font-size: 22px; 
+				}
+
+				th, td {
+					font-size: 14px; 
+					padding: 6px; 
+				}
+
+				.code-block {
+					font-size: 13px; 
+					padding: 8px; 
+				}
+
+				footer {
+					padding: 15px;
+				}
+
+				pre, table {
+					overflow-x: auto; 
+					white-space: pre-wrap;
+				}
+        	}
+		</style>
+	</head>
+	<body>
+
+	<header>
+		<h1>URL Shorten API Documentation</h1>
+		<p>Version 1.0 | A JSON API for shortening URL</p>
+	</header>
+
+	<div class="container">
+		<h1>Endpoints Overview</h1>
+		<table>
+			<thead>
+				<tr>
+					<th>Method</th>
+					<th>URL Pattern</th>
+					<th>Action</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr>
+					<td>GET</td>
+					<td class="endpoint"><a href="#healthcheck">/v1/healthcheck</a></td>
+					<td>Show application information</td>
+				</tr>
+				<tr>
+					<td>GET</td>
+					<td class="endpoint"><a href="#redirect">/:shortURL</a></td>
+					<td>Redirected to base URL</td>
+				</tr>
+				<tr>
+					<td>POST</td>
+					<td class="endpoint"><a href="#POST_url">/v1/url</a></td>
+					<td>Create a new shorten URL</td>
+				</tr>
+				
+			</tbody>
+		</table><br>
+
+		<h1>Endpoint Details</h1>
+
+		<div class="description">
+			<h2 id="healthcheck">GET /v1/healthcheck</h2>
+			<p>This endpoint will return some basic information about our API, including its current version number and operating environment.</p>
+
+			<p><strong>Example Request:</strong></p>
+			<div class="code-block"><p>curl urlshortenapi.mahmud.pro/v1/healthcheck</p></div>
+
+			<p><b>Successful Response:</b></p>
+			<div class="code-block">
+				<pre>
+{
+	"status": "available",
+	"system_info": {
+		"environment": "production",
+		"version": "v1.0.0-8-ge863d51"
+	}
+}
+				</pre>
+			</div>
+		</div><br>
+
+		<div class="description">
+			<h2 id="POST_url">POST /v1/url</h3>
+			<p>This endpoint will create the shorten URL. This endpoint will expect user to provide the following details in a JSON request body. User can request up to 3 successful request in on minutes. In 30 minutes user can create maximum 10 shorten URL</p>
+
+			<p><b>Accepted JSON key-value pair in request BODY: </b></p>
+			<table>
+				<thead>
+					<tr>
+						<th>Key</th>
+						<th>Value Type</th>
+						<th>Example</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr>
+						<td>url</td>
+						<td>string</td>
+						<td>{"url":"https://google.com/accounts"}</td>
+					</tr>
+					<tr>
+						<td>custom_short (optional)</td>
+						<td>string</td>
+						<td>{"url":"https://google.com/accounts", "custom_short":"google"}</td>
+					</tr>
+					<tr>
+						<td>expiry (optional, in hour, default is 24 hours)</td>
+						<td>string</td>
+						<td>{"url":"https://google.com/accounts", "custom_short":"google", "expiry": 48}</td>
+					</tr>
+				</tbody>
+			</table>
+
+			<p><strong>Example Request:</strong></p>
+			<div class="code-block"><p>curl -X PUT -d '{"url":"https://google.com/accounts", "custom_short":"google", "expiry": 48}' urlshortenapi.mahmud.pro/v1/url</p></div>
+
+			<p><strong>Successful Response:</strong></p>
+			<div class="code-block">
+				<pre>
+{
+	"url": "https://google.com/accounts",
+	"shorten_url": "urlshortenapi.mahmud.pro/google",
+	"expiry": 48,
+	"rate_remaining": 9,
+	"rate_limit_reset": 29
+}
+				</pre>
+			</div>
+		</div><br>
+
+		<div class="description">
+			<h2 id="redirect">GET /:shortURL</h2>
+			<p>This endpoint will redirect the user's request to base URL</p>
+
+			<p><strong>Example Request:</strong></p>
+			<div class="code-block"><p>curl urlshortenapi.mahmud.pro/google</p></div>
+
+			<p><strong>Successful Redirect:</strong></p>
+			<p>User will ended up to this "https://google.com/accounts" URL.</p>
+		</div><br>
+	</div>
+
+	<footer>
+		<p>&copy; 2024 mahmud.pro - All Rights Reserved</p>
+	</footer>
+
+	</body>
+	</html>
+{{end}}

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
 	"os"
 	"strconv"
@@ -14,7 +15,7 @@ import (
 
 type input struct {
 	URL         string        `json:"url"`
-	CustomShort string        `json:"short"`
+	CustomShort string        `json:"custom_short"`
 	Expiry      time.Duration `json:"expiry"`
 }
 
@@ -177,4 +178,40 @@ func (app *application) resolveURL(c *fiber.Ctx) error {
 	}
 
 	return c.Redirect(res, fiber.StatusSeeOther)
+}
+
+func (app *application) healthCheckHandler(c *fiber.Ctx) error {
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{
+		"status": "available",
+		"system_info": fiber.Map{
+			"environment": app.config.env,
+			"version": version,
+		},
+	})
+}
+
+func (app *application) apiDocumentation(c *fiber.Ctx) error {
+	tmpl, err := app.Documentation()
+	if err != nil {
+		app.errorLog.Println(err)
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "internal server error",
+		})
+	}
+	
+	// return tmpl.Execute(c, nil)
+	var buf bytes.Buffer
+
+	err = tmpl.Execute(&buf, nil) // Replace 'nil' with data if needed
+	if err != nil {
+		app.errorLog.Println(err)
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "internal server error",
+		})
+	}
+
+	c.Response().Header.Set("content-type", "text/html")
+
+	// Write the buffer content to the response body
+	return c.Status(fiber.StatusOK).Send(buf.Bytes())
 }
