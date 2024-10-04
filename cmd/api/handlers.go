@@ -92,7 +92,7 @@ func (app *application) shortenURL(c *fiber.Ctx) error {
 		})
 	}
 
-	if !DomainError(body.URL) {
+	if !DomainError(body.URL, c) {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"error": "host domain can't be shorten",
 		})
@@ -122,7 +122,7 @@ func (app *application) shortenURL(c *fiber.Ctx) error {
 
 	output := output{
 		URL:             body.URL,
-		ShortenURL:      os.Getenv("DOMAIN") + "/" + id,
+		ShortenURL:      c.BaseURL() + "/" + id,
 		Expiry:          body.Expiry,
 		XRateRemaining:  10,
 		XRateLimitReset: 30,

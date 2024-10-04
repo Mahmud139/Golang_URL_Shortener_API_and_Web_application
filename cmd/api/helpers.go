@@ -1,8 +1,9 @@
 package main
 
 import (
-	"os"
 	"strings"
+
+	"github.com/gofiber/fiber/v2"
 )
 
 func (app *application) checkCustomShort(url string) (bool, error) {
@@ -18,8 +19,8 @@ func (app *application) checkCustomShort(url string) (bool, error) {
 	return false, nil
 }
 
-func DomainError(url string) bool {
-	if url == os.Getenv("DOMAIN") {
+func DomainError(url string, c *fiber.Ctx) bool {
+	if url == c.BaseURL() {
 		return false
 	}
 
@@ -28,7 +29,7 @@ func DomainError(url string) bool {
 	newUrl = strings.Replace(newUrl, "www.", "", 1)
 	newUrl = strings.Split(newUrl, "/")[0]
 
-	return newUrl != os.Getenv("DOMAIN")
+	return newUrl != c.BaseURL()
 }
 
 func EnforceHTTP(url string) string {
