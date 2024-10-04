@@ -1,0 +1,158 @@
+{{define "doc"}}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>QuickLink - URL Shortener</title>
+  <style>
+    body {
+		font-family: Arial, sans-serif;
+		margin: 0;
+		padding: 0;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		height: 100vh;
+		background-color: #f4f4f9;
+    }
+
+    h1 {
+		margin-bottom: 20px;
+		color: #333;
+    }
+
+    .form-container {
+		background: #fff;
+		padding: 20px;
+		border-radius: 8px;
+		box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+		width: 450px;
+    }
+
+    textarea, input {
+		width: 95%;
+		padding: 10px;
+		margin: 10px 0;
+		border-radius: 4px;
+		border: 1px solid #ccc;
+    }
+
+    textarea {
+		height: 80px;
+		resize: none;
+    }
+
+    button {
+		background-color: #28a745;
+		color: white;
+		margin-top: 10px;
+		padding: 10px 15px;
+		border: none;
+		border-radius: 4px;
+		cursor: pointer;
+		font-size: 16px;
+		width: 100%;
+    }
+
+    button:hover {
+		background-color: #218838;
+    }
+
+    .result {
+		margin-top: 20px;
+		padding: 10px;
+		background-color: #e2f3e7;
+		border: 1px solid #28a745;
+		border-radius: 4px;
+		color: #155724;
+		display: none;
+    }
+  </style>
+</head>
+<body>
+<h1>QuickLink - Shorten Your URLs!</h1>
+
+  <div class="form-container">
+    <form id="shortenForm">
+      <label for="baseUrl">Base URL:</label>
+      <textarea id="baseUrl" placeholder="Enter the long URL here..." required></textarea>
+
+      <label for="customShorten">Custom Shorten (optional):</label>
+      <input type="text" id="customShorten" placeholder="Enter custom short URL slug (optional)">
+
+      <label for="expiry">Expiry in hours:</label>
+      <input type="number" id="expiry" placeholder="Enter expiry time in hours" required>
+
+      <button type="button" onclick="shortenURL()">Shorten URL</button>
+    </form>
+
+	<div>
+		<h6>Note:</h6>
+		<ul>
+			<li><small>You can create 3 short URL in 1 minute.</small></li>
+			<li><small>You can create 10 short URL in 30 minutes.</small></li>
+		</ul>
+	</div>
+
+    <div class="result" id="result"></div>
+  </div>
+
+  <script>
+	function shortenURL() {
+	  const baseUrl = document.getElementById("baseUrl").value;
+	  const customShorten = document.getElementById("customShorten").value;
+	  const expiry = document.getElementById("expiry").value;
+  
+	  const data = {
+		url: baseUrl,
+		custom_short: customShorten || null,
+		expiry: parseInt(expiry) // Convert expiry to integer if necessary
+	  };
+  
+	  // Create a new XMLHttpRequest
+	  const xhr = new XMLHttpRequest();
+	  xhr.open("POST", "/shorten-url", true); // Specify the backend route for shortening
+	  xhr.setRequestHeader("Content-Type", "application/json");
+  
+	  // Set up what happens when the request completes
+	  xhr.onload = function() {
+		try {
+		  const response = JSON.parse(xhr.responseText); // Parse the JSON response
+  
+		  if (xhr.status === 200) {
+			if (response.shortUrl) {
+			  document.getElementById("result").style.display = "block";
+			  document.getElementById("result").innerHTML = `<strong>Shortened URL:</strong> <a href="${response.shortUrl}" target="_blank">${response.shortUrl}</a>`;
+			} else {
+			  document.getElementById("result").style.display = "block";
+			  document.getElementById("result").innerHTML = `<strong>Error:</strong> ${response.error || "Unknown error occurred"}`;
+			}
+		  } else {
+			document.getElementById("result").style.display = "block";
+			document.getElementById("result").innerHTML = `<strong>Error:</strong> ${response.error || "Unknown error occurred"}`;
+		  }
+		} catch (e) {
+		  document.getElementById("result").style.display = "block";
+		  document.getElementById("result").innerHTML = `<strong>Error:</strong> Unable to parse server response.`;
+		}
+	  };
+  
+	  // Handle network errors
+	  xhr.onerror = function() {
+		document.getElementById("result").style.display = "block";
+		document.getElementById("result").innerHTML = `<strong>Error:</strong> Network error occurred.`;
+	  };
+  
+	  console.log(JSON.stringify(data));
+  
+	  // Send the request with the data
+	  xhr.send(JSON.stringify(data));
+	}
+  </script>
+  
+
+</body>
+</html>
+{{end}}
