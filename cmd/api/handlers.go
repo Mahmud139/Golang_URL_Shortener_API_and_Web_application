@@ -1,10 +1,15 @@
 package main
 
 import (
+	"fmt"
+	"os"
+	"strconv"
 	"time"
 
-	"github.com/gofiber/fiber/v2"
 	"github.com/asaskevich/govalidator"
+	"github.com/gofiber/fiber/v2"
+	"github.com/google/uuid"
+	"github.com/redis/go-redis/v9"
 )
 
 type input struct {
@@ -15,7 +20,7 @@ type input struct {
 
 type output struct {
 	URL             string        `json:"url"`
-	CustomShort     string        `json:"short"`
+	ShortenURL      string        `json:"shorten_url"`
 	Expiry          time.Duration `json:"expiry"`
 	XRateRemaining  int           `json:"rate_remaining"`
 	XRateLimitReset time.Duration `json:"rate_limit_reset"`
@@ -27,6 +32,42 @@ func (app *application) shortenURL(c *fiber.Ctx) error {
 	if err := c.BodyParser(&body); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error": "cannot parse JSON or invalid JSON body",
+		})
+	}
+
+	api_quota, err := app.rdb.Get(app.config.db.ctx, c.IP()).Result()
+	if err == redis.Nil {
+		err = app.rdb.Set(app.config.db.ctx, c.IP(), os.Getenv("API_QUOTA"), 30*60*time.Second).Err()
+		if err != nil {
+			app.errorLog.Println(err)
+			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+				"error": "internal server error",
+			})
+		}
+	} else if err != nil {
+		app.errorLog.Println(err)
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "internal server error",
+		})
+	}
+
+	api_quotaInt, err := strconv.Atoi(api_quota)
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "cannot parse JSON or invalid JSON body",
+		})
+	}
+
+	if api_quotaInt <= 0 {
+		timeRemaining, err := app.rdb.TTL(app.config.db.ctx, c.IP()).Result()
+		if err != nil {
+			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+				"error": "cannot parse JSON or invalid JSON body",
+			})
+		}
+		return c.Status(fiber.StatusServiceUnavailable).JSON(fiber.Map{
+			"error":            "rate limit exceeded",
+			"rate_limit_reset": fmt.Sprintf("after %v seconds", timeRemaining),
 		})
 	}
 
@@ -50,20 +91,90 @@ func (app *application) shortenURL(c *fiber.Ctx) error {
 		})
 	}
 
-	
-
-	return nil
-}
-
-func (app *application) checkCustomShort(url string) (bool, error) {
-	exist, err := app.rdb.Exists(app.config.db.ctx, url).Result()
-	if err != nil {
-		return false, err
+	if !DomainError(body.URL) {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "host domain can't be shorten",
+		})
 	}
 
-	return exist, nil
+	body.URL = EnforceHTTP(body.URL)
+
+	var id string
+
+	if body.CustomShort == "" {
+		id = uuid.NewString()[:8]
+	} else {
+		id = body.CustomShort
+	}
+
+	if body.Expiry == 0 {
+		body.Expiry = 24
+	}
+
+	err = app.rdb.Set(app.config.db.ctx, id, body.URL, body.Expiry*3600*time.Second).Err()
+	if err != nil {
+		app.errorLog.Println(err)
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "internal server error",
+		})
+	}
+
+	output := output{
+		URL:             body.URL,
+		ShortenURL:      os.Getenv("DOMAIN") + "/" + id,
+		Expiry:          body.Expiry,
+		XRateRemaining:  10,
+		XRateLimitReset: 30,
+	}
+
+	err = app.rdb.Decr(app.config.db.ctx, c.IP()).Err()
+	if err != nil {
+		app.errorLog.Println(err)
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "internal server error",
+		})
+	}
+
+	rateRemaining, err := app.rdb.Get(app.config.db.ctx, c.IP()).Result()
+	if err != nil {
+		app.errorLog.Println(err)
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "internal server error",
+		})
+	}
+	output.XRateRemaining, err = strconv.Atoi(rateRemaining)
+	if err != nil {
+		app.errorLog.Println(err)
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "internal server error",
+		})
+	}
+	ttl, err := app.rdb.TTL(app.config.db.ctx, c.IP()).Result()
+	if err != nil {
+		app.errorLog.Println(err)
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "internal server error",
+		})
+	}
+	output.XRateLimitReset = ttl / time.Nanosecond / time.Minute
+
+	return c.Status(fiber.StatusOK).JSON(output)
 }
 
 func (app *application) resolveURL(c *fiber.Ctx) error {
-	return nil
+	id := c.Params("url")
+
+	res, err := app.rdb.Get(app.config.db.ctx, id).Result()
+	if err == redis.Nil {
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
+			"error": "base URL not found against provided shorten URL",
+		})
+	} else if err != nil {
+		app.errorLog.Println(err)
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "internal server error",
+		})
+	}
+
+	return c.Redirect(res, fiber.StatusSeeOther)
 }

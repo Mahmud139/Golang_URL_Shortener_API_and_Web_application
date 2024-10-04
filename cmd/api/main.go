@@ -68,6 +68,7 @@ func main() {
 	if err != nil {
 		errorLog.Fatal(err)
 	}
+	defer rdb.Close()
 	infoLog.Println("database connection is established!")
 
 	app := application{
