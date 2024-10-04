@@ -5,8 +5,9 @@ import (
 )
 
 func (app *application) routes(r *fiber.App) {
-	r.Get("", func(c *fiber.Ctx) error {
-		res, _ := app.rdb.Get(app.config.db.ctx, "name").Result()
-		return c.SendString("Bismillah "+ res)
-	})
+	//need to implement rate limiter middleware
+	// need to implement panic recover middleware
+	// need to implement not found(404) middleware
+	r.Get("/:url", app.resolveURL)
+	r.Post("/v1/url", app.shortenURL)
 }
