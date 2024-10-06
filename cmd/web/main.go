@@ -45,8 +45,8 @@ func main() {
 
 	flag.IntVar(&cfg.port, "port", 8080, "API server port")
 	flag.StringVar(&cfg.env, "env", "development", "Environment (development|staging|production)")
-	flag.StringVar(&cfg.db.db_address, "db-addr", os.Getenv(""), "Redis DB address")
-	flag.StringVar(&cfg.db.db_password, "db-passwd", os.Getenv(""), "Redis DB password")
+	flag.StringVar(&cfg.db.db_address, "db-addr", os.Getenv("DB_ADDR"), "Redis DB address")
+	flag.StringVar(&cfg.db.db_password, "db-passwd", os.Getenv("DB_PASS"), "Redis DB password")
 	flag.IntVar(&cfg.db.db_no, "db-no", 0, "Redis DB number")
 
 	displayVersion := flag.Bool("version", false, "Display version and exit")

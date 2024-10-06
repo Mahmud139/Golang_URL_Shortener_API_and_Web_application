@@ -1,13 +1,30 @@
 FROM alpine:latest
 
-RUN adduser -S -D -H -h /api apiuser
+# Create a system user
+RUN adduser -S -D -H -h /apiservice apiuser
 
+# Ensure the /apiservice directory exists and copy the binary
+RUN mkdir -p /apiservice
+
+# Copy the binary while still being root
+COPY ./bin/api /apiservice/
+
+COPY ./bin/.env /apiservice/
+
+# Set permissions for the binary
+RUN chmod 755 /apiservice/api
+
+# Change ownership to apiuser
+RUN chown -R apiuser /apiservice
+
+# Switch to the non-root user
 USER apiuser
 
-COPY ./../bin/api /api
+# Set the working directory
+WORKDIR /apiservice
 
-WORKDIR /api
-
+# Expose the required port
 EXPOSE 3004
 
-CMD [ "./api", "-port=3004", "-env=production"]
+# Command to run the application
+CMD [ "./api", "-port=3004", "-env=production" ]

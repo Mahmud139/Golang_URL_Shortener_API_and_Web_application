@@ -1,10 +1,10 @@
-version: '3.8'
+version: '3.3'
 
 services:
   web:
     build:
-      context: ./cmd
-      dockerfile: Dockerfile.web
+      context: .
+      dockerfile: ./cmd/Dockerfile.web
     ports:
       - "3005:3005"
     networks:
@@ -18,14 +18,13 @@ services:
       interval: 1m30s
       timeout: 30s
       retries: 5
-      start_period: 30s
     labels:
       - com.host.description=web  
 
   api:
     build:
-      context: ./cmd
-      dockerfile: Dockerfile.api
+      context: .
+      dockerfile: ./cmd/Dockerfile.api
     ports:
       - "3004:3004"
     networks:
@@ -39,7 +38,6 @@ services:
       interval: 1m30s
       timeout: 30s
       retries: 5
-      start_period: 30s
     labels:
       - com.host.description=api  
 
@@ -51,6 +49,7 @@ services:
       - web_api_network
     volumes:
       - ./data:/data
+    restart: always
 
 networks:
   web_api_network:

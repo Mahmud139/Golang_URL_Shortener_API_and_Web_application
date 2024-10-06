@@ -1,12 +1,20 @@
 FROM alpine:latest
 
-RUN adduser -S -D -H -h /web webuser
+RUN adduser -S -D -H -h /webservice webuser
+
+RUN mkdir -p /webservice
+
+COPY ./bin/web /webservice/
+
+COPY ./bin/.env /webservice/
+
+RUN chmod 755 /webservice/web
+
+RUN chown -R webuser /webservice
 
 USER webuser
 
-COPY ./../bin/web /web
-
-WORKDIR /web
+WORKDIR /webservice
 
 EXPOSE 3005
 
