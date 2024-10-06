@@ -10,4 +10,4 @@ WORKDIR /api
 
 EXPOSE 3004
 
-CMD [ "./api" ]
+CMD [ "./api", "-port=3004", "-env=production"]

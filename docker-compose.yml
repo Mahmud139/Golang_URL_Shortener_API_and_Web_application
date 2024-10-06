@@ -2,31 +2,56 @@ version: '3.8'
 
 services:
   web:
-    # build:
     build:
-      context: contextPath
-      dockerfile: Dockerfile
+      context: ./cmd
+      dockerfile: Dockerfile.web
     ports:
-      -
-    volumes:
-      -
+      - "3005:3005"
     networks:
-      - 
+      - web_api_network
     depends_on:
-      - 
-    command: command
-    restart:
-    container_name: name
+      - db
+    restart: always
+    container_name: url_shorten_web
     healthcheck:
-      test: ["executable", "arg"]
+      test:  ["CMD", "curl", "-f", "http://localhost:3005"]
       interval: 1m30s
       timeout: 30s
       retries: 5
       start_period: 30s
     labels:
-      - com.host.description=label  
+      - com.host.description=web  
+
   api:
+    build:
+      context: ./cmd
+      dockerfile: Dockerfile.api
+    ports:
+      - "3004:3004"
+    networks:
+      - web_api_network
+    depends_on:
+      - db
+    restart: always
+    container_name: url_shorten_api
+    healthcheck:
+      test:  ["CMD", "curl", "-f", "http://localhost:3004"]
+      interval: 1m30s
+      timeout: 30s
+      retries: 5
+      start_period: 30s
+    labels:
+      - com.host.description=api  
 
   db:
+    image: redis:alpine
+    ports:
+      - "6379:6379"
+    networks:
+      - web_api_network
+    volumes:
+      - ./data:/data
 
 networks:
+  web_api_network:
+    driver: bridge
