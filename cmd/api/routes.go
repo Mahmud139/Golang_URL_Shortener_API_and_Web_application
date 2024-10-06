@@ -13,6 +13,7 @@ func (app *application) routes(r *fiber.App) {
 		EnableStackTrace: true,
 	}))
 
+	r.Get("/", app.apiDocumentation)
 	r.Get("/:url", app.resolveURL)
 	r.Post("/v1/url", limiter.New(limiter.Config{
 		Max:                3,
@@ -20,7 +21,6 @@ func (app *application) routes(r *fiber.App) {
 		SkipFailedRequests: true,
 	}), app.shortenURL)
 	r.Get("/v1/healthcheck", app.healthCheckHandler)
-	r.Get("/v1/api-documentation", app.apiDocumentation)
 
 	r.Use(func(c *fiber.Ctx) error {
 		return c.SendStatus(404)
