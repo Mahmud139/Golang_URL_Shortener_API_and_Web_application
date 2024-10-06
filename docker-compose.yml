@@ -1,0 +1,32 @@
+version: '3.8'
+
+services:
+  web:
+    # build:
+    build:
+      context: contextPath
+      dockerfile: Dockerfile
+    ports:
+      -
+    volumes:
+      -
+    networks:
+      - 
+    depends_on:
+      - 
+    command: command
+    restart:
+    container_name: name
+    healthcheck:
+      test: ["executable", "arg"]
+      interval: 1m30s
+      timeout: 30s
+      retries: 5
+      start_period: 30s
+    labels:
+      - com.host.description=label  
+  api:
+
+  db:
+
+networks:
