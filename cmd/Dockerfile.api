@@ -1,1 +1,13 @@
-FROM alpine
+FROM alpine:latest
+
+RUN adduser -S -D -H -h /api apiuser
+
+USER apiuser
+
+COPY ./../bin/api /api
+
+WORKDIR /api
+
+EXPOSE 3004
+
+CMD [ "./api" ]

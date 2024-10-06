@@ -151,7 +151,7 @@ func (app *application) healthCheckHandler(c *fiber.Ctx) error {
 		"status": "available",
 		"system_info": fiber.Map{
 			"environment": app.config.env,
-			"version": version,
+			"version":     version,
 		},
 	})
 }
@@ -164,7 +164,7 @@ func (app *application) home(c *fiber.Ctx) error {
 			"error": "internal server error",
 		})
 	}
-	
+
 	// return tmpl.Execute(c, nil)
 	var buf bytes.Buffer
 

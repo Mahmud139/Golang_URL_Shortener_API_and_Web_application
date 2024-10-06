@@ -87,7 +87,7 @@ func main() {
 	infoLog.Printf("starting %s server on port :%d\n", cfg.env, cfg.port)
 
 	err = fiberApp.Listen(fmt.Sprintf(":%d", cfg.port))
-	
+
 	if err != nil {
 		errorLog.Fatal(err)
 	}

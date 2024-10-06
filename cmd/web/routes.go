@@ -12,18 +12,17 @@ func (app *application) routes(r *fiber.App) {
 	r.Use(recover.New(recover.Config{
 		EnableStackTrace: true,
 	}))
-	
+
 	r.Get("/", app.home)
 	r.Get("/:url", app.resolveURL)
 	r.Post("/shorten-url", limiter.New(limiter.Config{
-		Max: 3,
-		Expiration: 1 * time.Minute,
+		Max:                3,
+		Expiration:         1 * time.Minute,
 		SkipFailedRequests: true,
 	}), app.shortenURL)
 	r.Get("/app/healthcheck", app.healthCheckHandler)
-	
 
 	r.Use(func(c *fiber.Ctx) error {
-        return c.SendStatus(404)
-    })
+		return c.SendStatus(404)
+	})
 }
