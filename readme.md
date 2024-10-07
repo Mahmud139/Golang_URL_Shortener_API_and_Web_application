@@ -13,7 +13,7 @@ This project provides a URL shortening service, which allows users to shorten UR
 
 ## Tech Stack
 
-- **Backend (API)**: Go
+- **Backend (API)**: Go (used [__Fiber__](https://github.com/gofiber/fiber) web framework)
 - **Backend (Web)**: Go
 - **Frontend (Web)**: HTML, CSS, JavaScript
 - **Database**: Redis
