@@ -33,6 +33,7 @@ This project provides a URL shortening service, which allows users to shorten UR
 ├── go.mod              # Go module dependencies
 ├── go.sum              # Go module checksums
 └── Makefile            # Build and run automation
+```
 
 ## Usage
 
@@ -40,11 +41,12 @@ This project provides a URL shortening service, which allows users to shorten UR
 ```bash
 gh repo clone Mahmud139/Golang_URL_Shortener_API_and_Web_application
 cd your-repo
+```
 
 ### 2. Build and run the application using Docker Compose:
 ```bash
 docker-compose up --build
-
+```
 This will build and start both the API and web application in their respective Docker containers.
 
 ### 3. Access the web interface:
