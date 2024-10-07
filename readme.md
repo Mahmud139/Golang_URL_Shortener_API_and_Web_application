@@ -50,14 +50,14 @@ make build/api
 make build/web
 ```
 
-### 2. Build and run the application using Docker Compose:
+### 3. Build and run the application using Docker Compose:
 ```bash
 docker-compose up --build
 ```
 This will build and start both the API and web application in their respective Docker containers.
 
-### 3. Access the web interface:
+### 4. Access the web interface:
 - Navigate to http://localhost:3005 in your browser to use the URL shortener.
 
-### 4. API Endpoints:
+### 5. API Endpoints:
 - Navigate to http://localhost:3004 in your browser to see details of API Endpoints.
