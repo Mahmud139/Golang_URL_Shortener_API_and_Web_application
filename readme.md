@@ -43,6 +43,13 @@ gh repo clone Mahmud139/Golang_URL_Shortener_API_and_Web_application
 cd your-repo
 ```
 
+### 2. Build the binary using Makefile
+```bash
+make audit
+make build/api
+make build/web
+```
+
 ### 2. Build and run the application using Docker Compose:
 ```bash
 docker-compose up --build
