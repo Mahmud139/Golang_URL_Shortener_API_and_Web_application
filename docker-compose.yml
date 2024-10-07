@@ -5,6 +5,10 @@ services:
     build:
       context: .
       dockerfile: ./cmd/Dockerfile.web
+    environment:
+      - DB_ADDR="db:6379"
+      - DB_PASS=""
+      - API_QUOTA=10
     ports:
       - "3005:3005"
     networks:
@@ -17,14 +21,16 @@ services:
       test:  ["CMD", "curl", "-f", "http://localhost:3005"]
       interval: 1m30s
       timeout: 30s
-      retries: 5
-    labels:
-      - com.host.description=web  
+      retries: 5 
 
   api:
     build:
       context: .
       dockerfile: ./cmd/Dockerfile.api
+    environment:
+      - DB_ADDR="db:6379"
+      - DB_PASS=""
+      - API_QUOTA=10
     ports:
       - "3004:3004"
     networks:
@@ -37,9 +43,7 @@ services:
       test:  ["CMD", "curl", "-f", "http://localhost:3004"]
       interval: 1m30s
       timeout: 30s
-      retries: 5
-    labels:
-      - com.host.description=api  
+      retries: 5 
 
   db:
     image: redis:alpine
@@ -50,6 +54,7 @@ services:
     volumes:
       - ./data:/data
     restart: always
+    container_name: redis-db
 
 networks:
   web_api_network:
